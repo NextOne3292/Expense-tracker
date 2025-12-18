@@ -1,12 +1,12 @@
-# Expense Tracker – Backend API
+# Expense Tracker – MERN Backend
 
-A MERN stack backend API for managing user authentication, expenses, income, categories, and dashboard analytics. Built using Node.js, Express, MongoDB, and JWT.
+A MERN stack backend application for managing income, expenses, categories, and dashboard analytics with JWT authentication.
 
 ## Features
 - JWT-based user authentication
-- CRUD operations for expenses, income, and categories
-- Protected routes using authentication middleware
-- Dashboard analytics using MongoDB aggregation
+- CRUD operations for income, expenses, and categories
+- Protected routes using middleware
+- Dashboard analytics with MongoDB aggregation
 
 ## Tech Stack
 - Node.js
@@ -14,41 +14,34 @@ A MERN stack backend API for managing user authentication, expenses, income, cat
 - MongoDB
 - Mongoose
 - JWT
-- Nodemon
 
+## Project Structure
+server/
+├── controllers/
+├── models/
+├── routes/
+├── middlewares/
+├── config/
+├── index.js
+└── package.json
 ## How to Run Locally
 
-### 1. Clone the repository
 ```bash
 git clone https://github.com/NextOne3292/Expense-tracker.git
 cd Expense-tracker/server
-
----
-
-
- ### 2. Install dependencies
+### 2. Install dependencies
 ```bash
 npm install
----
-
 
 ### 3. Create environment variables
-Create a file named `.env` inside the `server` folder and write:
+Create a `.env` file inside the `server` folder:
+```env
 PORT=3000
 MONGO_URI=your_mongodb_uri
 JWT_SECRET_KEY=your_secret
+### 4. Start the development server
+```bash
+npm run dev
 
-
-
- ### 4. start the development server
- ```bash 
- npm run dev
- ---
-
- ### 5.Author
-
-Aswathy – MERN Stack Developer
-GitHub: https://github.com/NextOne3292
-
-
+  
  
