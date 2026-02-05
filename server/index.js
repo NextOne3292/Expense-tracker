@@ -8,7 +8,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-
+import transactionRoutes from "./routes/transactionRoutes.js";
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -20,7 +20,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/income", incomeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
+app.use("/api/transactions", transactionRoutes);
 app.get("/", (req, res) =>
   res.send("Expense Tracker API running 🚀")
 );
