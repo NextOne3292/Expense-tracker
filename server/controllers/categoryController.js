@@ -5,53 +5,54 @@ import mongoose from "mongoose";
 export const createCategory = async (req, res) => {
   try {
     const { title, type, icon = "", color = "" } = req.body;
-    if (!title || !type) return res.status(400).json({ message: "Title and type required" });
 
-    const normalizedTitle = title.trim();
+    if (!title || !type)
+      return res.status(400).json({ message: "Title and type required" });
+
+    const normalized = title.trim();
+
     const existing = await Category.findOne({
-      title: normalizedTitle,
+      title: normalized,
       type,
-      user: req.user ? req.user._id : null
+      user: req.user._id
     });
-    if (existing) return res.status(409).json({ message: "Category already exists" });
+
+    if (existing)
+      return res.status(409).json({ message: "Category already exists" });
 
     const category = await Category.create({
-      title: normalizedTitle,
+      title: normalized,
       type,
       icon,
       color,
       user: req.user._id,
       isDefault: false
     });
-    return res.status(201).json(category);
+
+    res.status(201).json(category);
   } catch (err) {
-    if (err && err.code === 11000) return res.status(409).json({ message: "Category already exists" });
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* GET ALL (defaults + user) */
+/* GET ALL (supports type filter) */
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({
+    const filter = {
       $or: [{ user: null }, { user: req.user._id }]
-    }).populate("user", "name email").sort({ createdAt: -1 });
-    return res.status(200).json(categories);
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
-};
+    };
 
-/* GET ONE */
-export const getCategoryById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid id" });
-    const cat = await Category.findById(id).populate("user", "name email");
-    if (!cat) return res.status(404).json({ message: "Category not found" });
-    return res.status(200).json(cat);
+    if (req.query.type) {
+      filter.type = req.query.type;
+    }
+
+    const categories = await Category.find(filter)
+      .sort({ title: 1 })
+      .lean();
+
+    res.status(200).json(categories);
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -59,17 +60,30 @@ export const getCategoryById = async (req, res) => {
 export const updateCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid id" });
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ message: "Invalid id" });
+
+    const cat = await Category.findById(id);
+    if (!cat) return res.status(404).json({ message: "Category not found" });
+
+    if (cat.isDefault)
+      return res.status(403).json({ message: "Default categories cannot be modified" });
+
+    if (String(cat.user) !== String(req.user._id))
+      return res.status(403).json({ message: "Forbidden" });
 
     const update = { ...req.body };
     if (update.title) update.title = update.title.trim();
 
-    const updated = await Category.findByIdAndUpdate(id, update, { new: true, runValidators: true });
-    if (!updated) return res.status(404).json({ message: "Category not found" });
-    return res.status(200).json(updated);
+    const updated = await Category.findByIdAndUpdate(id, update, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json(updated);
   } catch (err) {
-    if (err && err.code === 11000) return res.status(409).json({ message: "Category already exists" });
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -77,11 +91,22 @@ export const updateCategoryById = async (req, res) => {
 export const deleteCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "Invalid id" });
-    const deleted = await Category.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ message: "Category not found" });
-    return res.status(200).json({ message: "Category deleted" });
+
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return res.status(400).json({ message: "Invalid id" });
+
+    const cat = await Category.findById(id);
+    if (!cat) return res.status(404).json({ message: "Category not found" });
+
+    if (cat.isDefault)
+      return res.status(403).json({ message: "Default categories cannot be deleted" });
+
+    if (String(cat.user) !== String(req.user._id))
+      return res.status(403).json({ message: "Forbidden" });
+
+    await Category.findByIdAndDelete(id);
+    res.status(200).json({ message: "Category deleted" });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };

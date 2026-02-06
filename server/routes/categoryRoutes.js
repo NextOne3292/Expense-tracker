@@ -2,7 +2,7 @@ import express from "express";
 import {
   createCategory,
   getCategories,
-  getCategoryById,
+  
   updateCategoryById,
   deleteCategoryById
 } from "../controllers/categoryController.js";
@@ -18,7 +18,7 @@ router.post("/", protect, createCategory);
 router.get("/", protect, getCategories);
 
 // GET single category
-router.get("/:id", protect, getCategoryById);
+
 
 // UPDATE category
 router.put("/:id", protect, updateCategoryById);
